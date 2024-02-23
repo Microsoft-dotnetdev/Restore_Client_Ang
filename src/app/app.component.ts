@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, WritableSignal, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { NavBarComponent } from './core/nav-bar/nav-bar.component';
 import { ShopComponent } from './shop/shop.component';
-
 
 
 @Component({
@@ -16,3 +15,4 @@ import { ShopComponent } from './shop/shop.component';
 export class AppComponent {
   title = 'Skinet'
 }
+

@@ -1,28 +1,28 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ShopService } from './shop.service';
-import { Product } from '../shared/models/product';
+import { Product, ProductResponse } from '../shared/models/product';
 import { Pagination } from '../shared/models/pagination';
 import { ProductItemComponent } from './product-item/product-item.component';
 import { ProductBrand } from '../shared/models/product-brand';
 import { ProductType } from '../shared/models/product-type';
-
+import { PaginationModule } from 'ngx-bootstrap/pagination';
+import { ShopParams } from '../shared/models/shop-params';
 
 @Component({
   selector: 'app-shop',
   standalone: true,
-  imports: [ProductItemComponent],
+  imports: [ProductItemComponent, PaginationModule],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss'
 })
 export class ShopComponent implements OnInit {
   private shopService = inject(ShopService);
-  products: Product[] = [];
   productBrands: ProductBrand[] = [];
   productTypes: ProductType[] = [];
-  pagination: Pagination | null = null;
-  brandIdSelected = signal(0);
-  typeIdSelected = signal(0);
-  sortSelected = signal('name');
+
+  productResponse = signal<ProductResponse>(new ProductResponse());
+  shopParams = signal(new ShopParams());
+
   sortOptions = [
     { name: 'Alphabetical', value: 'name' },
     { name: 'Price: Low to high', value: 'price' },
@@ -36,21 +36,12 @@ export class ShopComponent implements OnInit {
   }
 
   getProducts() {
-    this.shopService.getProducts(this.brandIdSelected(), this.typeIdSelected(), this.sortSelected()).subscribe(
+    this.shopService.getProducts(this.shopParams()).subscribe(
       {
         next: (res) => {
-          const paging = res.headers.get('pagination')
-          if (paging) {
-            this.pagination = JSON.parse(paging);
-          }
-          if (res.body)
-            this.products = res.body;
+          this.productResponse.set(res);
         },
-        error: (err) => console.log(err),
-        complete() {
-          console.log('request completed');
-        },
-
+        error: (err) => console.log(err)
       }
     );
   }
@@ -73,17 +64,40 @@ export class ShopComponent implements OnInit {
   }
 
   onBrandSelected(brandId: number) {
-    this.brandIdSelected.set(brandId);
+    //this.shopParams.set({ ...this.shopParams(), brandId });
+    this.shopParams.update((state: ShopParams) => {
+      return { ...state, brandId, pagination: new Pagination() }
+    });
     this.getProducts();
   }
   onTypeSelected(typeId: number) {
-    this.typeIdSelected.set(typeId);
+    this.shopParams.update((state: ShopParams) => {
+      return { ...state, typeId, pagination: new Pagination() }
+    });
     this.getProducts();
   }
 
   onSortSelected(selectedVal: string) {
-    //console.log(selectedVal);
-    this.sortSelected.set(selectedVal);
+    this.shopParams.update((state: ShopParams) => {
+      return { ...state, sort: selectedVal, pagination: new Pagination() }
+    });
     this.getProducts();
   }
+
+
+  onPageChanged(event: any) {
+    if (this.shopParams().pagination.pageNumber !== event.page) {
+      this.shopParams.update((state: ShopParams) => {
+        return {
+          ...state,
+          pagination: {
+            ...state.pagination,
+            pageNumber: event.page,
+          }
+        }
+      });
+      this.getProducts();
+    }
+  }
+
 }
