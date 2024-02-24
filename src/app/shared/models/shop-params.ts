@@ -5,4 +5,5 @@ export class ShopParams {
   typeId = 0;
   sort = 'name';
   pagination = new Pagination();
+  search = '';
 }

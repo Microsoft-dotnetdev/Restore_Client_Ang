@@ -1,26 +1,28 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { ShopService } from './shop.service';
-import { Product, ProductResponse } from '../shared/models/product';
+import { Product } from '../shared/models/product';
 import { Pagination } from '../shared/models/pagination';
 import { ProductItemComponent } from './product-item/product-item.component';
 import { ProductBrand } from '../shared/models/product-brand';
 import { ProductType } from '../shared/models/product-type';
-import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { ShopParams } from '../shared/models/shop-params';
+import { PagingHeaderComponent } from '../shared/paging-header/paging-header.component';
+import { PagerComponent } from '../shared/pager/pager.component';
 
 @Component({
   selector: 'app-shop',
   standalone: true,
-  imports: [ProductItemComponent, PaginationModule],
+  imports: [ProductItemComponent, PagingHeaderComponent, PagerComponent],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss'
 })
 export class ShopComponent implements OnInit {
   private shopService = inject(ShopService);
-  productBrands: ProductBrand[] = [];
-  productTypes: ProductType[] = [];
 
-  productResponse = signal<ProductResponse>(new ProductResponse());
+  productBrands = signal<ProductBrand[]>([]);
+  productTypes = signal<ProductType[]>([]);
+
+  products = signal(new Pagination<Product>());
   shopParams = signal(new ShopParams());
 
   sortOptions = [
@@ -35,11 +37,18 @@ export class ShopComponent implements OnInit {
     this.getProductTypes();
   }
 
-  getProducts() {
+  getProducts(reload: boolean = true) {
+    if (reload) {
+      this.shopParams.update(v => {
+        v.pagination = new Pagination<Product>();
+        return v;
+      });
+    }
+
     this.shopService.getProducts(this.shopParams()).subscribe(
       {
         next: (res) => {
-          this.productResponse.set(res);
+          this.products.set(res)
         },
         error: (err) => console.log(err)
       }
@@ -49,7 +58,7 @@ export class ShopComponent implements OnInit {
   getProductBrands() {
     this.shopService.getBrands().subscribe(
       {
-        next: response => this.productBrands = [{ id: 0, name: 'All' }, ...response],
+        next: response => this.productBrands.set([{ id: 0, name: 'All' }, ...response]),
         error: err => console.log(err)
       }
     )
@@ -57,47 +66,59 @@ export class ShopComponent implements OnInit {
   getProductTypes() {
     this.shopService.getTypes().subscribe(
       {
-        next: response => this.productTypes = [{ id: 0, name: 'All' }, ...response],
+        next: response => this.productTypes.set([{ id: 0, name: 'All' }, ...response]),
         error: err => console.log(err)
       }
     )
   }
 
   onBrandSelected(brandId: number) {
-    //this.shopParams.set({ ...this.shopParams(), brandId });
-    this.shopParams.update((state: ShopParams) => {
-      return { ...state, brandId, pagination: new Pagination() }
+    this.shopParams.update(v => {
+      v.brandId = brandId;
+      return v;
     });
     this.getProducts();
   }
   onTypeSelected(typeId: number) {
-    this.shopParams.update((state: ShopParams) => {
-      return { ...state, typeId, pagination: new Pagination() }
+    this.shopParams.update(v => {
+      v.typeId = typeId;
+      return v;
     });
     this.getProducts();
   }
-
   onSortSelected(selectedVal: string) {
-    this.shopParams.update((state: ShopParams) => {
-      return { ...state, sort: selectedVal, pagination: new Pagination() }
+    this.shopParams.update(v => {
+      v.sort = selectedVal;
+      return v;
     });
     this.getProducts();
   }
-
+  onSearch(searchVal: string) {
+    this.onSearchChange(searchVal);
+    this.getProducts()
+  }
+  onReset() {
+    this.shopParams.set(new ShopParams());
+    this.getProducts();
+  }
+  onSearchChange(searchVal: string) {
+    this.shopParams.update(v => {
+      v.search = searchVal
+      return v;
+    });
+    //console.log("Search: " + this.shopParams().search);
+  }
 
   onPageChanged(event: any) {
     if (this.shopParams().pagination.pageNumber !== event.page) {
-      this.shopParams.update((state: ShopParams) => {
-        return {
-          ...state,
-          pagination: {
-            ...state.pagination,
-            pageNumber: event.page,
-          }
-        }
-      });
-      this.getProducts();
+      this.shopParams.update(v => {
+        v.pagination.pageNumber = event.page
+        return v;
+      })
+      this.getProducts(false);
     }
   }
+
+
 
 }

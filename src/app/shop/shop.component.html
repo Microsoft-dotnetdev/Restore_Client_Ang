@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <section class="col-3">
-      <h5 class="text-warning">Sort</h5>
+      <h5 class="text-warning ms-3">Sort</h5>
       <select class="form-select mb-4" #sort (change)="onSortSelected(sort.value)">
         @for (item of sortOptions; track $index) {
         <option value="{{item.value}}">{{item.name}}</option>
@@ -9,51 +9,52 @@
       </select>
       <h5 class="text-warning ms-3">Brands</h5>
       <ul class="list-group my-3">
-        @for (brand of productBrands; track $index) {
+        @for (brand of productBrands(); track $index) {
         <li class="list-group-item" [class.active]="brand.id === shopParams().brandId" [value]="brand.id"
-          (click)="onBrandSelected(brand.id)">{{brand.name}}</li>
+            (click)="onBrandSelected(brand.id)">{{brand.name}}</li>
         }
       </ul>
       <h5 class="text-warning ms-3">Types</h5>
       <ul class="list-group my-3">
-        @for (type of productTypes; track $index) {
+        @for (type of productTypes(); track $index) {
         <li class="list-group-item" [class.active]="type.id === shopParams().typeId" [value]="type.id"
-          (click)="onTypeSelected(type.id)">{{type.name}}</li>
+            (click)="onTypeSelected(type.id)">{{type.name}}</li>
         }
       </ul>
 
     </section>
     <section class="col-9">
+      @if (products().totalCount>0)
+      {
       <div class="d-flex justify-content-between align-items-center pb-2">
-        <header>
-          <span>Showing <strong>{{(shopParams().pagination.pageNumber-1)* shopParams().pagination.pageSize+1}}
-              - {{
-              shopParams().pagination.pageNumber * shopParams().pagination.pageSize > shopParams().pagination.totalCount
-              ? shopParams().pagination.totalCount
-              : shopParams().pagination.pageNumber* shopParams().pagination.pageSize
-              }}
-            </strong> of <strong>18</strong> Results</span>
-        </header>
+        <app-paging-header [pageNumber]="products().pageNumber"
+                           [pageSize]="products().pageSize"
+                           [totalCount]="products().totalCount" />
         <div class="d-flex mt-2">
-          <input type="text" class="form-control me-2" placeholder="Search">
-          <button class="btn btn-outline-primary mx-2">Search</button>
-          <button class="btn btn-outline-success">Reset</button>
+          <input type="text" class="form-control me-2" placeholder="Search" #search
+                 (keyup)="onSearchChange(search.value)" [value]="shopParams().search"
+                 (keyup.enter)="onSearch(search.value)">
+          <button class="btn btn-outline-primary mx-2" (click)="onSearch(search.value)">Search</button>
+          <button class="btn btn-outline-success" (click)="onReset()">Reset</button>
         </div>
       </div>
-      <div class="row row-cols-3 g-3  mb-4">
-        @for (product of productResponse().data; track $index) {
+      }
+      <div class="row row-cols-3 g-3 mb-4">
+        @for (product of products().data; track $index) {
         <app-product-item [product]="product" />
         }
         @empty {
-        <div class="text-bg-info">No product found!!</div>
+        <div class="text-bg-info d-flex flex-grow-1 justify-content-center align-items-center mt-5">
+          No product found!!
+        </div>
         }
       </div>
-      @if (productResponse().data.length>0) {
+      @if (products().data.length) {
       <div class="d-flex justify-content-center">
-        <pagination [boundaryLinks]="true" [totalItems]="productResponse().metaData.totalCount"
-          [itemsPerPage]="productResponse().metaData.pageSize" (pageChanged)="onPageChanged($event)" [maxSize]="10"
-          previousText="&lsaquo;" nextText="&rsaquo;" firstText="&laquo;" lastText="&raquo;">
-        </pagination>
+        <app-pager (pageChanged)="onPageChanged($event)"
+                   [currentPage]="products().pageNumber"
+                   [pageSize]="products().pageSize"
+                   [totalCount]="products().totalCount"></app-pager>
       </div>
       }
     </section>

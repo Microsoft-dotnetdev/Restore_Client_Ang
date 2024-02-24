@@ -1,0 +1,14 @@
+@if (totalCount && pageSize)
+{
+<pagination [boundaryLinks]="true"
+            [totalItems]="totalCount"
+            [itemsPerPage]="pageSize"
+            (pageChanged)="onPagerChanged($event)"
+            [maxSize]="10"
+            [ngModel]="currentPage"
+            previousText="&lsaquo;"
+            nextText="&rsaquo;"
+            firstText="&laquo;"
+            lastText="&raquo;">
+</pagination>
+}
