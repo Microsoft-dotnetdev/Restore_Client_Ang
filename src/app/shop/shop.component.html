@@ -1,4 +1,5 @@
 <div class="container">
+  @if (productTypes().length>0 && productTypes().length>0) {
   <div class="row">
     <section class="col-3">
       <h5 class="text-warning ms-3">Sort</h5>
@@ -24,8 +25,7 @@
 
     </section>
     <section class="col-9">
-      @if (products().totalCount>0)
-      {
+
       <div class="d-flex justify-content-between align-items-center pb-2">
         <app-paging-header [pageNumber]="products().pageNumber"
                            [pageSize]="products().pageSize"
@@ -38,18 +38,13 @@
           <button class="btn btn-outline-success" (click)="onReset()">Reset</button>
         </div>
       </div>
-      }
+
+      @if (products().data.length>0) {
       <div class="row row-cols-3 g-3 mb-4">
         @for (product of products().data; track $index) {
         <app-product-item [product]="product" />
         }
-        @empty {
-        <div class="text-bg-info d-flex flex-grow-1 justify-content-center align-items-center mt-5">
-          No product found!!
-        </div>
-        }
       </div>
-      @if (products().data.length) {
       <div class="d-flex justify-content-center">
         <app-pager (pageChanged)="onPageChanged($event)"
                    [currentPage]="products().pageNumber"
@@ -57,6 +52,12 @@
                    [totalCount]="products().totalCount"></app-pager>
       </div>
       }
+      @else{
+      <app-empty [isLoading]="busyService.isLoading">
+        No product found!!!
+      </app-empty>
+      }
     </section>
   </div>
+  }
 </div>

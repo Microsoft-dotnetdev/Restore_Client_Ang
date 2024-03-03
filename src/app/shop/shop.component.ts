@@ -8,22 +8,28 @@ import { ProductType } from '../shared/models/product-type';
 import { ShopParams } from '../shared/models/shop-params';
 import { PagingHeaderComponent } from '../shared/paging-header/paging-header.component';
 import { PagerComponent } from '../shared/pager/pager.component';
+import { EmptyComponent } from '../shared/empty/empty.component';
+import { BusyService } from '../core/services/busy.service';
+
 
 @Component({
   selector: 'app-shop',
   standalone: true,
-  imports: [ProductItemComponent, PagingHeaderComponent, PagerComponent],
+  imports: [ProductItemComponent, PagingHeaderComponent, PagerComponent, EmptyComponent],
   templateUrl: './shop.component.html',
   styleUrl: './shop.component.scss'
 })
 export class ShopComponent implements OnInit {
   private shopService = inject(ShopService);
+  busyService = inject(BusyService);
 
   productBrands = signal<ProductBrand[]>([]);
   productTypes = signal<ProductType[]>([]);
 
   products = signal(new Pagination<Product>());
   shopParams = signal(new ShopParams());
+
+
 
   sortOptions = [
     { name: 'Alphabetical', value: 'name' },

@@ -7,6 +7,7 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { PaginationModule } from 'ngx-bootstrap/pagination';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { provideToastr } from 'ngx-toastr';
+import { loadingInterceptor } from './core/interceptors/loading.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,7 +18,7 @@ export const appConfig: ApplicationConfig = {
       positionClass: 'toast-bottom-right',
       preventDuplicates: true,
     }), // Toastr providers
-    provideHttpClient(withInterceptors([errorInterceptor])),
+    provideHttpClient(withInterceptors([errorInterceptor, loadingInterceptor])),
     { provide: DEFAULT_CURRENCY_CODE, useValue: 'INR' },
     //importProvidersFrom(PaginationModule.forRoot()),
     //{ provide: LOCALE_ID, useValue: 'fr-FR' }       
