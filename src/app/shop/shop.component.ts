@@ -64,7 +64,7 @@ export class ShopComponent implements OnInit {
   getProductBrands() {
     this.shopService.getBrands().subscribe(
       {
-        next: response => this.productBrands.set([{ id: 0, name: 'All' }, ...response]),
+        next: response => this.productBrands.set([{ id: '', name: 'All' }, ...response]),
         error: err => console.log(err)
       }
     )
@@ -72,20 +72,20 @@ export class ShopComponent implements OnInit {
   getProductTypes() {
     this.shopService.getTypes().subscribe(
       {
-        next: response => this.productTypes.set([{ id: 0, name: 'All' }, ...response]),
+        next: response => this.productTypes.set([{ id: '', name: 'All' }, ...response]),
         error: err => console.log(err)
       }
     )
   }
 
-  onBrandSelected(brandId: number) {
+  onBrandSelected(brandId: string) {
     this.shopParams.update(v => {
       v.brandId = brandId;
       return v;
     });
     this.getProducts();
   }
-  onTypeSelected(typeId: number) {
+  onTypeSelected(typeId: string) {
     this.shopParams.update(v => {
       v.typeId = typeId;
       return v;

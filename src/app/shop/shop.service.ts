@@ -5,21 +5,22 @@ import { ProductBrand } from '../shared/models/product-brand';
 import { ProductType } from '../shared/models/product-type';
 import { ShopParams } from '../shared/models/shop-params';
 import { Pagination } from '../shared/models/pagination';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShopService {
-  baseUrl = 'https://localhost:5001/api/'
+  baseUrl = environment.apiUrl //'https://localhost:5001/api/'
   private http = inject(HttpClient);
   constructor() { }
 
   getProducts(shopParams: ShopParams) {
     let params = new HttpParams();
 
-    if (shopParams.brandId > 0) params = params.append('brands', shopParams.brandId);
-    if (shopParams.typeId > 0) params = params.append('types', shopParams.typeId);
+    if (shopParams.brandId != '') params = params.append('brands', shopParams.brandId);
+    if (shopParams.typeId != '') params = params.append('types', shopParams.typeId);
     params = params.append('OrderBy', shopParams.sort);
     params = params.append('pageNumber', shopParams.pagination.pageNumber);
     params = params.append('pageSize', shopParams.pagination.pageSize);

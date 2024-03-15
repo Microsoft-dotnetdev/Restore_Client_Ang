@@ -1,8 +1,8 @@
 import { Pagination } from "./pagination";
 
 export class ShopParams {
-  brandId = 0;
-  typeId = 0;
+  brandId = '';
+  typeId = '';
   sort = 'name';
   pagination = new Pagination();
   search = '';
